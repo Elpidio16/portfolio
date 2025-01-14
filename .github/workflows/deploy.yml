@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Étape 1 : Récupérer le code source
+     
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Étape 2 : Configurer Docker pour construire l'image
+      
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -32,11 +32,11 @@ jobs:
           # Pousser l'image sur Docker Hub
           docker push $IMAGE_NAME
 
-      # Étape 3 : Installer cURL
+     
       - name: Install cURL
         run: sudo apt-get install -y curl
 
-      # Étape 4 : Créer un projet Vercel via API
+      
       - name: Create Vercel Project
         env:
           VERCEL_API_TOKEN: ${{ secrets.VERCEL_API_TOKEN }}
@@ -56,7 +56,7 @@ jobs:
 
           echo "Response: $RESPONSE"
 
-      # Étape 5 : Déployer sur Vercel
+     
       - name: Deploy to Vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_API_TOKEN }}
