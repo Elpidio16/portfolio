@@ -1,4 +1,4 @@
-name: Deploy my portfolio
+name: Build and Deploy Docker Image
 
 on:
   push:
@@ -6,57 +6,32 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-     
+      # Étape 1 : Récupérer le code source
       - name: Checkout code
         uses: actions/checkout@v3
 
-      
+      # Étape 2 : Se connecter à Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
+      # Étape 3 : Construire l'image Docker
+      - name: Build Docker image
         run: |
-          # Définir le nom de l'image
-          IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/portfolio:latest
+          docker build -t elpidio16/my-portfolio:latest .
 
-          # Construire l'image
-          docker build -t $IMAGE_NAME .
-
-          # Pousser l'image sur Docker Hub
-          docker push $IMAGE_NAME
-
-     
-      - name: Install cURL
-        run: sudo apt-get install -y curl
-
-      
-      - name: Create Vercel Project
-        env:
-          VERCEL_API_TOKEN: ${{ secrets.VERCEL_API_TOKEN }}
+      # Étape 4 : Pousser l'image sur Docker Hub
+      - name: Push Docker image
         run: |
-          # Définir le nom du projet
-          PROJECT_NAME=$(basename $(git rev-parse --show-toplevel))
+          docker push elpidio16/my-portfolio:latest
 
-          # Appeler l'API de création de projet
-          RESPONSE=$(curl -X POST https://api.vercel.com/v9/projects \
-            -H "Authorization: Bearer $VERCEL_API_TOKEN" \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"name\": \"$PROJECT_NAME\",
-              \"framework\": null,
-              \"public\": true
-            }")
-
-          echo "Response: $RESPONSE"
-
-     
+      # Étape 5 : Déployer sur Vercel
       - name: Deploy to Vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_API_TOKEN }}
