@@ -1,24 +1,21 @@
-name: Deploy to Vercel
+name: Deploy my portfolio
 
 on:
   push:
     branches:
-      - main  # Changez cette branche si nécessaire
+      - main 
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Étape 1 : Cloner le dépôt
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Étape 2 : Installer cURL
       - name: Install cURL
         run: sudo apt-get install -y curl
 
-      # Étape 3 : Créer le projet sur Vercel via API
       - name: Create Vercel Project
         env:
           VERCEL_API_TOKEN: ${{ secrets.VERCEL_API_TOKEN }}
@@ -38,7 +35,6 @@ jobs:
 
           echo "Response: $RESPONSE"
 
-      # Étape 4 : Déployer avec Vercel CLI
       - name: Deploy to Vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_API_TOKEN }}
