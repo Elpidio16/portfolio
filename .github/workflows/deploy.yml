@@ -3,27 +3,48 @@ name: Deploy my portfolio
 on:
   push:
     branches:
-      - main 
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # Étape 1 : Récupérer le code source
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Étape 2 : Configurer Docker pour construire l'image
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        run: |
+          # Définir le nom de l'image
+          IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/portfolio:latest
+
+          # Construire l'image
+          docker build -t $IMAGE_NAME .
+
+          # Pousser l'image sur Docker Hub
+          docker push $IMAGE_NAME
+
+      # Étape 3 : Installer cURL
       - name: Install cURL
         run: sudo apt-get install -y curl
 
+      # Étape 4 : Créer un projet Vercel via API
       - name: Create Vercel Project
         env:
           VERCEL_API_TOKEN: ${{ secrets.VERCEL_API_TOKEN }}
         run: |
-          # Définir le nom du projet (nom du dépôt GitHub)
+          # Définir le nom du projet
           PROJECT_NAME=$(basename $(git rev-parse --show-toplevel))
 
-          # Appeler l'API de création de projet sans Team ID
+          # Appeler l'API de création de projet
           RESPONSE=$(curl -X POST https://api.vercel.com/v9/projects \
             -H "Authorization: Bearer $VERCEL_API_TOKEN" \
             -H "Content-Type: application/json" \
@@ -35,6 +56,7 @@ jobs:
 
           echo "Response: $RESPONSE"
 
+      # Étape 5 : Déployer sur Vercel
       - name: Deploy to Vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_API_TOKEN }}
